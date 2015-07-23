@@ -113,6 +113,7 @@ module Colourdistance
     builder.c_singleton 'VALUE ciede2000(VALUE color1, VALUE color2) {
       double pi = 3.1415927;
       double e = 2.7182818;
+      double conversion = pi/180;
       double l1;
       double l2;
       double a1;
@@ -169,7 +170,6 @@ module Colourdistance
       a1 = 500.0 * (fx-fy);
       b1 = 200.0 * (fy-fz);
 
-
       if(x2 <= 0.008856){
         fx = (7.787 * x2/0.95047 + 16.0/116.0);
       }else{
@@ -192,7 +192,6 @@ module Colourdistance
 
       a2 = 500.0 * (fx-fy);
       b2 = 200.0 * (fy-fz);
-
 
       double c1 = sqrt(a1*a1+b1*b1);
       double c2 = sqrt(a2*a2+b2*b2);
@@ -235,7 +234,7 @@ module Colourdistance
         h = h2 - h1 - 360.0;
       }
 
-      double hdelta = 2.0 * sqrt(c1prime * c2prime) * sin(h/2.0);
+      double hdelta = 2.0 * sqrt(c1prime * c2prime) * sin(conversion*h/2.0);
       double hprime = (h1 + h2)/2.0;
       if (fabs(h1 - h2) > 180.0){
         hprime += 180.0;
@@ -244,18 +243,22 @@ module Colourdistance
         hprime *= 2.0;
       }
 
-      double t = 1.0 - 0.17*cos(hprime-30.0) +
-                  0.24*cos(2.0*hprime) +
-                  0.32*cos(3.0*hprime + 6.0) -
-                  0.20*cos(4.0*hprime-63.0);
+      double t = 1.0 - 0.17*cos(conversion*(hprime-30.0)) +
+                  0.24*cos(conversion*(2.0*hprime)) +
+                  0.32*cos(conversion*(3.0*hprime + 6.0)) -
+                  0.20*cos(conversion*(4.0*hprime-63.0));
 
       double sl = 1.0 + 0.015 * lbaradj/sqrt(20+lbaradj);
       double sc = 1.0 + 0.045*cprime;
       double sh = 1.0 + 0.015*cprime*t;
 
-      double rt = -2.0*cprimeadj*sin(60.0*pow(e,(hdelta-275.0)*(hdelta-275.0)/(-625.0)));
+      if (hprime < 0.0){
+        hprime += 360.0;
+      }
 
-      double ldiff = (l1 - l2)/(sl);
+      double rt = -2.0*cprimeadj*sin(conversion*60.0*pow(e,-(hprime-275.0)*(hprime-275.0)/(-625.0)));
+
+      double ldiff = (l1 - l2)/sl;
       double adiff = cprimedelta/sc;
       double bdiff = hdelta/sh;
       double rdiff = rt*adiff*bdiff;
