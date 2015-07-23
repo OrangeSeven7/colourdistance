@@ -9,9 +9,6 @@ module Colourdistance
     builder.c_singleton 'VALUE ciede94(VALUE color1, VALUE color2) {
       double pi = 3.1415927;
       double e = 2.7182818;
-      double _kL = 1.0;
-      double _kC = 1.0;
-      double _kH = 1.0;
       double l1;
       double l2;
       double a1;
@@ -113,12 +110,9 @@ module Colourdistance
       return DBL2NUM(sqrt(ldiff*ldiff+adiff*adiff+bdiff*bdiff)/50.0);
     }'
 
-    builder.c_singleton 'VALUE cie2000(VALUE color1, VALUE color2) {
+    builder.c_singleton 'VALUE ciede2000(VALUE color1, VALUE color2) {
       double pi = 3.1415927;
       double e = 2.7182818;
-      double _kL = 1.0;
-      double _kC = 1.0;
-      double _kH = 1.0;
       double l1;
       double l2;
       double a1;
