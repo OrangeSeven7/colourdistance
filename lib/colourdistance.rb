@@ -114,6 +114,9 @@ module Colourdistance
       double pi = 3.1415927;
       double e = 2.7182818;
       double conversion = pi/180;
+      double _kL = 1.0;
+      double _kC = 1.0;
+      double _kH = 1.0;
       double l1;
       double l2;
       double a1;
@@ -256,7 +259,7 @@ module Colourdistance
         hprime += 360.0;
       }
 
-      double rt = -2.0*cprimeadj*sin(conversion*60.0*pow(e,-(hprime-275.0)*(hprime-275.0)/(-625.0)));
+      double rt = -2.0*cprimeadj*sin(conversion*60.0*pow(e,(hprime-275.0)*(hprime-275.0)/(-625.0)));
 
       double ldiff = (l1 - l2)/sl;
       double adiff = cprimedelta/sc;
