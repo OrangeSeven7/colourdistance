@@ -1,3 +1,3 @@
 module Colourdistance
-  VERSION = "0.0.7"
+  VERSION = "0.7.7"
 end
