@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["theseventhorange@gmail.com"]
 
   spec.summary       = "Measures the difference (as a distance between colors in lab space) between colours. Takes rgb input. Will add support for xyz and lab around version 1.0."
-  spec.description   = "Currently only contains three options (ciede 76, ciede94, and ciede2000), all weighted to (roughly) a [0,1] scale (actually possible to get slightly above 1). Will add more. All are my own implementations (although ciede2000 is based on a several dozen implementations found during research), and they may be wrong because of it. Thanks go out to Josh Clayton (https://robots.thoughtbot.com/get-your-c-on), for helping me to understand the structure I was attempting to acheive."
+  spec.description   = "Currently contains four options (ciede 76, cmclc, ciede94, and ciede2000) (all here: https://en.wikipedia.org/wiki/Color_difference), all weighted so that the distance between rgb 0,0,0 and rgb 255,255,255 will be 1.000 (accurate to 4 decimal places). Will add more. All are my own implementations (although ciede2000 is based on several dozen implementations found during research), and they may be wrong because of it. If you see any problems, let me know. Thanks go out to Josh Clayton (https://robots.thoughtbot.com/get-your-c-on), for helping me to understand the structure I was attempting to acheive."
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
