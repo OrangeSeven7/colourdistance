@@ -7,15 +7,13 @@
  
 void Init_colourdistance() {
   VALUE rb_mColourdistance = rb_define_module("Colourdistance");
-  rb_define_singleton_method(rb_mColourdistance, "cie76", ciede2000, 2);
-  rb_define_singleton_method(rb_mColourdistance, "cie94", ciede2000, 2);
+  rb_define_singleton_method(rb_mColourdistance, "cie76", cie76, 2);
+  rb_define_singleton_method(rb_mColourdistance, "cmclc", cmclc, 2);
+  rb_define_singleton_method(rb_mColourdistance, "cie94", cie94, 2);
   rb_define_singleton_method(rb_mColourdistance, "ciede2000", ciede2000, 2);
 }
 
 static VALUE cie76(const VALUE self, VALUE color1, VALUE color2) {
-  double pi = 3.1415927;
-  double e = 2.7182818;
-  double conversion = pi/180.0;
   static double lab1[3];
   static double lab2[3];
 
@@ -39,10 +37,80 @@ static VALUE cie76(const VALUE self, VALUE color1, VALUE color2) {
   return DBL2NUM(val);
 }
 
-static VALUE cie94(const VALUE self, VALUE color1, VALUE color2) {
+static VALUE cmclc(const VALUE self, VALUE color1, VALUE color2) {
   double pi = 3.1415927;
-  double e = 2.7182818;
-  double conversion = pi/180.0;
+  double kl = 2.0;
+  double k1 = 0.048;
+  double k2 = 0.014;
+
+  static double lab1[3];
+  static double lab2[3];
+
+  rgb_to_lab(color1, lab1);
+
+  double l1 = lab1[0];
+  double a1 = lab1[1];
+  double b1 = lab1[2];
+
+  rgb_to_lab(color2, lab2);
+  double l2 = lab2[0];
+  double a2 = lab2[1];
+  double b2 = lab2[2];
+
+  double ldiff = l1 - l2;
+  double adiff = a1 - a2;
+  double bdiff = b1 - b2;
+
+  double c1 = sqrt(a1*a1+b1*b1);
+  double c2 = sqrt(a2*a2+b2*b2);
+  double deltac = c1 - c2;
+
+  double cbar = (c1 + c2)/2.0;
+  double cbaradj = sqrt(pow(cbar,7)/(pow(cbar,7)+6103515625.0));
+
+  double a1prime = a1 + (a1/2.0) * (1.0-cbaradj);
+  double a2prime = a2 + (a2/2.0) * (1.0-cbaradj);
+
+  double h1;
+  double h2;
+  if(c1 == 0.0){
+    h1 = 0.0;
+  }else{
+    h1 = fmod(atan2(b1,a1prime)*180.0/pi,360.0);
+  }
+  if(c2 == 0.0){
+    h2 = 0.0;
+  }else{
+    h2 = fmod(atan2(b2,a2prime)*180.0/pi,360.0);
+  }
+
+  double deltah = sqrt(adiff*adiff+bdiff*bdiff-deltac*deltac);
+
+
+  double f = sqrt(pow(c1,4)/(pow(c1,4) + 1900.0));
+  double t;
+  if(164.0 <= h1 && h1 <= 345.0){
+    t = 0.56 + fabs(0.2*cos(h1+168.0));
+  }else{
+    t = 0.36 + fabs(0.4*cos(h1+35.0));
+  }
+
+  double sl = 0.511;
+  if(l1 >= 16.0){
+    sl = 0.040975 * l1 / (1.0 + 0.01765 * l1);
+  }
+  double sc = 0.0638 * c1 / (1.0 + 0.0131 * c1) + 0.638;
+  double sh = 1 + k2*c1;
+
+  double e1 = ldiff/sl;
+  double e2 = deltac / sc;
+  double e3 = deltah / sh;
+  double val = sqrt(e1*e1+e2*e2+e3*e3)/195.7;
+
+  return DBL2NUM(val);
+}
+
+static VALUE cie94(const VALUE self, VALUE color1, VALUE color2) {
   double kl = 2.0;
   double k1 = 0.048;
   double k2 = 0.014;
@@ -77,7 +145,7 @@ static VALUE cie94(const VALUE self, VALUE color1, VALUE color2) {
   double e1 = ldiff/kl;
   double e2 = deltac / (k1*sc);
   double e3 = deltah / (k2*sh);
-  double val = sqrt(e1*e1+e2*e2+e3*e3)/100.0;
+  double val = sqrt(e1*e1+e2*e2+e3*e3)/50.0;
 
   return DBL2NUM(val);
 }
@@ -173,7 +241,6 @@ static VALUE ciede2000(const VALUE self, VALUE color1, VALUE color2) {
 
   return DBL2NUM(val);
 }
-
 
 void rgb_to_lab(VALUE color, double *lab) {
 
